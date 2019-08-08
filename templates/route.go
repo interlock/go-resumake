@@ -2,7 +2,6 @@ package templates
 
 import (
 	"github.com/interlock/go-resumake/jsonresume"
-	"io"
 	"errors"
 	"bytes"
 	"github.com/interlock/go-resumake/templates/awesome-cv"
@@ -10,7 +9,7 @@ import (
 
 // Temporary until we breake templates into exec
 
-func Render(template string, data jsonresume.JSONResume) (io.Writer, error) {
+func Render(template string, data jsonresume.JSONResume) (*bytes.Buffer, error) {
 	var output *bytes.Buffer = bytes.NewBuffer([]byte{})
 	var err error
 

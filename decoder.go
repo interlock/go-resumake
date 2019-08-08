@@ -7,21 +7,21 @@ import (
 	"github.com/interlock/go-resumake/jsonresume"
 )
 
-func decodeFile(path string) (*jsonresume.JSONResume, error) {
+func decodeFile(path string) (jsonresume.JSONResume, error) {
+	var jsonResume jsonresume.JSONResume
+
 	f, err := os.Open(path)
 	if (err != nil) {
-		return nil, err
+		return jsonResume, err
 	}
 	defer f.Close()
 
 	fBytes, err := ioutil.ReadAll(f)
 	if (err != nil) {
-		return nil, err
+		return jsonResume, err
 	}
-
-	var jsonResume jsonresume.JSONResume
 
 	json.Unmarshal(fBytes, &jsonResume)
 
-	return &jsonResume, nil
+	return jsonResume, nil
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"strings"
+	"github.com/interlock/go-resumake/templates"
 )
 
 func main() {
@@ -20,5 +21,26 @@ func main() {
 	if (strings.Compare(flagTemplate, "") == 0) {
 		fmt.Println("Template was empty")
 		os.Exit(3)
+	}
+	output, err := templates.Render(flagTemplate, jsonResume)
+	if (err != nil) {
+		fmt.Println(err)
+		os.Exit(4)
+	}
+	if (len(flagLatex) > 0) {
+		fp, err := os.Create(flagLatex)
+		if (err != nil) {
+			fmt.Println("%s\n", err)
+			os.Exit(5)
+		}
+
+		_, err = fp.Write(output.Bytes())
+		if (err != nil) {
+			fmt.Printf("%s\n", err)
+			os.Exit(6)
+		}
+		fp.Close()
+	} else {
+		fmt.Printf("%s\n", output)
 	}
 }
