@@ -1,10 +1,13 @@
 package awesomecv
 
 import (
-	"github.com/interlock/go-resumake/jsonresume"
+	"fmt"
 	"io"
-	"text/template"
+	"regexp"
 	"strings"
+	"text/template"
+
+	"github.com/interlock/go-resumake/jsonresume"
 )
 
 const document = `
@@ -17,7 +20,6 @@ const document = `
 \usepackage[T1]{fontenc}
 \textheight=10in
 \pagestyle{empty}
-\raggedright
 
 {{template "resumeDefinitions"}}
 
@@ -25,13 +27,13 @@ const document = `
 \vspace*{-40pt}
 {{ $data := . }}
 {{ range .Sections }}
-	{{- if eq . "Basics" }}
+	{{- if eq . "Basics" -}}
 	{{- template "Basics" $data -}}
-	{{ end -}}
+	{{- end -}}
 
-	{{- if eq . "Education" }}
+	{{- if eq . "Education" -}}
 	{{- template "Education" $data -}}
-	{{ end -}}
+	{{- end -}}
 
 	{{- if eq . "Work" }}
 	{{- template "Work" $data -}}
@@ -103,45 +105,46 @@ const resumeDefinitions = `
 	#4 \\\\
 }
 % END RESUME DEFINITIONS %%%%%%%%%%%%%%%%%%%%%%%
-{{ end }}
+{{- end -}}
 `
 
 const basics = `
 {{ define "Basics" }}
-{{ if .JSON.Basics }}
-{{ with .JSON.Basics }}
+{{- if .JSON.Basics -}}
+{{- with .JSON.Basics -}}
 
-	{{ $address := "" }}
-	{{ if .Location }}
-	{{ $address = .Location.Address }}
-	{{ end }}
+	{{- $address := "" -}}
+	{{- if .Location -}}
+	{{- $address = escape .Location.Address -}}
+	{{- end -}}
 	  
-	{{ $line1 := "" }} 
-  	{{ if .Name }}
-	{{ $line1 = printf "{\\Huge \\scshape {%s}}\\\\" .Name }}
-	{{ end }}
+	{{- $line1 := "" -}} 
+  {{- if .Name -}}
+	{{- $line1 = printf "{\\Huge \\scshape {%s}}\\\\" (escape .Name) -}}
+	{{- end -}}
 	  
-	{{ $line2 := newSlice }}
-	{{ if $address }}
-	{{ $line2 = appendSlice $line2 $address }}
-	{{ end }}
+	{{- $line2 := newSlice -}}
+	{{- if $address -}}
+	{{- $line2 = appendSlice $line2 $address -}}
+	{{- end -}}
 
-	{{ if .Email }}
-	{{ $line2 = appendSlice $line2 .Email }}
-	{{ end }}
+	{{- if .Email -}}
+	{{- $line2 = appendSlice $line2 (escape .Email) -}}
+	{{- end -}}
 
-	{{ if .Phone }}
-	{{ $line2 = appendSlice $line2 .Phone }}
-	{{ end }}
+	{{- if .Phone -}}
+	{{- $line2 = appendSlice $line2 (escape .Phone) -}}
+	{{- end -}}
 
-	{{ if .Website }}
-	{{ $line2 = appendSlice $line2 .Website }}
-	{{ end }}
+	{{- if .Website -}}
+	{{- $line2 = appendSlice $line2 (escape .Website) -}}
+	{{- end -}}
 
-	{{ $line2 = join $line2 " $\\cdot$ " }}
+	{{- $line2 = join $line2 " $\\cdot$ " -}}
 	
 
 %==== Profile ====%
+
 \vspace*{-10pt}
 \begin{center}
 	{{ $line1 }}
@@ -160,143 +163,166 @@ const education = `
 %==== Education ====%
 
 \header{Education}
-
-{{- range .JSON.Education }}
+{{ range .JSON.Education }}
   {{- $line1 := "" -}}
   {{- $line2 := "" -}}
   {{- if .Institution -}}
-	{{- $line1 = printf "%s\\textbf{%s}" $line1 .Institution }}
+	{{- $line1 = printf "%s\\textbf{%s}" $line1 (escape .Institution) }}
   {{- end -}}
   {{- if .Area -}}
-  	{{- $line1 = printf "%s\\hfill %s" $line1 .Area -}}
+  	{{- $line1 = printf "%s\\hfill %s" $line1 (escape .Area) -}}
   {{- end -}}
   {{- if .StudyType -}}
-	{{- $line2 = printf "%s" .StudyType -}}
+	{{- $line2 = printf "%s" (escape .StudyType) -}}
   {{- end -}}
-  {{ if .Area -}}
-	{{ if .StudyType -}}
-	  {{ $line2 = printf "%s %s" $line2 .Area -}}
-	{{ else -}}
-	  {{ $line2 = printf "Degree in %s" .Area -}}
-	{{ end -}}
-  {{ end -}}
-  {{ if .Gpa -}}
-	{{ $line2 = printf "%s \\textit{GPA: %s}" $line2 .Gpa -}}
-  {{ end -}}
-  {{ if or .StartDate .EndDate -}}
-	{{ $dates := newSlice }}
-	{{ if .StartDate }}{{ $dates = appendSlice $dates .StartDate }}{{end}}
-	{{ if .EndDate }}{{ $dates = appendSlice $dates .EndDate }}{{end}}
-	{{ $line2 = printf "%s \\hfill %s" $line2 (join $dates ".") }}
-  {{ end -}}
-  {{ if $line1 -}}
-	  {{ $line1 = printf "%s\\\\" $line1 -}}
-  {{ end -}}
-  {{ if $line2 -}}
-	  {{ $line2 = printf "%s\\\\" $line2 -}}
-  {{ end -}}
+  {{- if .Area -}}
+	{{- if .StudyType -}}
+	  {{- $line2 = printf "%s %s" $line2 (escape .Area) -}}
+	{{- else -}}
+	  {{- $line2 = printf "Degree in %s" (escape .Area) -}}
+	{{- end -}}
+  {{- end -}}
+  {{- if .Gpa -}}
+	{{- $line2 = printf "%s \\textit{GPA: %s}" $line2 .Gpa -}}
+  {{- end -}}
+  {{- if or .StartDate .EndDate -}}
+	{{- $dates := newSlice }}
+	{{- if .StartDate }}{{- $dates = appendSlice $dates .StartDate -}}{{- end -}}
+	{{- if .EndDate }}{{- $dates = appendSlice $dates .EndDate -}}{{- end -}}
+	{{- $line2 = printf "%s \\hfill %s" $line2 (join $dates ".") -}}
+  {{- end -}}
+  {{- if $line1 -}}
+	  {{- $line1 = printf "%s\\\\" $line1 -}}
+  {{- end -}}
+  {{- if $line2 -}}
+	  {{- $line2 = printf "%s\\\\" $line2 -}}
+  {{- end -}}
 {{ $line1 }}
 {{ $line2 }}
 \vspace{2mm}
-{{ end }}
-{{ end }}
-{{ end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 `
 
 const work = `
 {{ define "Work" }}
 {{ if .JSON.Work }}
 %==== Experience ====%
+
 \header{Experience}
 \vspace{1mm}
-{{ range .JSON.Work }}
-	{{ $line1 := "" }}
-	{{ $line2 := "" }}
-	{{ $highlightLines := newSlice }}
+{{- range .JSON.Work -}}
+	{{- $line1 := "" -}}
+	{{- $line2 := "" -}}
+	{{- $highlightLines := newSlice -}}
 	
-	{{ if .Company }}
-		{{ $line1 = printf "%s\\textbf{%s}" $line1 .Company}}
-    {{ end }}
+	{{- if .Company -}}
+		{{- $line1 = printf "%s\\textbf{%s}" $line1 (escape .Company) -}}
+  {{- end -}}
 
-	{{ if .Position }}
-		{{ $line2 = printf "%s\\textif{%s}" $line2 .Position }}
-	{{ end }}
+	{{- if .Position -}}
+		{{- $line2 = printf "%s\\textit{%s}" $line2 (escape .Position) -}}
+	{{- end -}}
 
-	{{ if and .StartDate .EndDate }}
-		{{ $line2 = printf "%s \\hfill %s - %s" $line2 .StartDate .EndDate }}
-	{{ else }}
-		{{ if .StartDate }}
-			{{ $line2 = printf "%s \\hfill %s - Present" $line2 .StartDate }}
-		{{ end }}
-		{{ if .EndDate }}
-			{{ $line2 = printf "%s \\hfill %s" $line2 .EndDate }}
-		{{ end }}
-	{{ end }}
+	{{- if and .StartDate .EndDate -}}
+		{{- $line2 = printf "%s \\hfill %s - %s" $line2 .StartDate .EndDate -}}
+	{{- else -}}
+		{{- if .StartDate -}}
+			{{- $line2 = printf "%s \\hfill %s - Present" $line2 .StartDate -}}
+		{{- end -}}
+		{{- if .EndDate -}}
+			{{- $line2 = printf "%s \\hfill %s" $line2 .EndDate -}}
+		{{- end -}}
+	{{- end -}}
 
-	{{ if $line1 }}{{ $line1 = printf "%s\\\\" $line1 }}{{ end }}
-	{{ if $line2 }}{{ $line2 = printf "%s\\\\" $line2 }}{{ end }}
+	{{- if $line1 -}}{{- $line1 = printf "%s\\\\" $line1 -}}{{- end -}}
+	{{- if $line2 -}}{{- $line2 = printf "%s\\\\" $line2 -}}{{- end -}}
 	
-	{{ if .Highlights }}
-		{{ $highlightLines = appendSlice $highlightLines "\\vspace{-1mm}" }}
-		{{ $highlightLines = appendSlice $highlightLines "\\begin{itemize} \\itemsep 1pd" }}
-		{{ range .Highlights }}
-			{{ $highlightLines = appendSlice $highlightLines (printf "\\item %s" .) }}
-		{{ end }}
-		{{ $highlightLines = appendSlice $highlightLines "\\end{itemize}" }}
-	{{ end }}
+	{{- if .Highlights -}}
+		{{- $highlightLines = appendSlice $highlightLines "\\vspace{-1mm}" -}}
+		{{- $highlightLines = appendSlice $highlightLines "\\begin{itemize} \\itemsep 1pt" -}}
+		{{- range .Highlights -}}
+			{{- $highlightLines = appendSlice $highlightLines (printf "\\item %s" (escape .)) -}}
+		{{- end -}}
+		{{- $highlightLines = appendSlice $highlightLines "\\end{itemize}" -}}
+	{{- end -}}
 	
 	{{ $line1 }}
 	{{ $line2 }}
 	{{ join $highlightLines "\n" }}
-{{ end }}
-{{ end }}
-{{ end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 `
 
 const skills = `
 {{ define "Skills" }}
+
+%==== Skills ====%
+
 \header{Skills}
 \begin{tabular}{ l p{.8\textwidth} }
-{{ range .JSON.Skills }}
-	{{ printf "%s: %s\\\\" .Name (join .Keywords ", ") }}
-{{ end }}
+{{- range .JSON.Skills -}}
+	{{- printf "%s: %s\\\\" (escape .Name) (escape (join .Keywords ", ")) -}}
+{{- end -}}
 \end{tabular}
 \vspace{2mm}
-{{ end }}
+{{- end -}}
 `
 
 func newSlice() []string {
-	return make([]string, 0, 0)
+	return make([]string, 0)
 }
 
 func appendSlice(in []string, v string) []string {
 	return append(in, v)
 }
 
+// escapeLatex
+// & % $ # _ { } ~ ^ \
+func escapeLatex(s string) string {
+	re := regexp.MustCompile(`[&$%#_\{\}~^\\]`)
+	return re.ReplaceAllStringFunc(s, func(str string) string {
+		if strings.Compare(str, "\\") == 0 {
+			return "\\textbackslash{}"
+		}
+		if strings.Compare(str, "~") == 0 {
+			// return "\\char`\\~"
+			return "{\\raise.17ex\\hbox{$\\scriptstyle\\mathtt{\\sim}$}}"
+		}
+		if strings.Compare(str, "^") == 0 {
+			return "\\char`\\^"
+		}
+		return fmt.Sprintf("\\%s", str)
+	})
+}
+
 func Render(resume jsonresume.JSONResume, output io.Writer) error {
 	funcs := template.FuncMap{
-		"join": strings.Join,
-		"newSlice": newSlice,
+		"join":        strings.Join,
+		"newSlice":    newSlice,
 		"appendSlice": appendSlice,
+		"escape":      escapeLatex,
 	}
-	
+
 	documentTemplate := template.Must(template.New("document").Funcs(funcs).Parse(document))
-	
+
 	template.Must(documentTemplate.Parse(resumeDefinitions))
 	template.Must(documentTemplate.Parse(basics))
 	template.Must(documentTemplate.Parse(education))
 	template.Must(documentTemplate.Parse(work))
 	template.Must(documentTemplate.Parse(skills))
 
-	sections := []string{ "Basics", "Education", "Work", "Skills" }
+	sections := []string{"Basics", "Education", "Work", "Skills"}
 	data := map[string]interface{}{
-		"JSON": resume,
+		"JSON":     resume,
 		"Sections": sections,
 	}
 	err := documentTemplate.Execute(output, data)
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
