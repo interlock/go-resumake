@@ -1,3 +1,4 @@
+//go:build mage
 // +build mage
 
 package main
@@ -18,8 +19,13 @@ import (
 func Build() error {
 	mg.Deps(InstallDeps)
 	fmt.Println("Building...")
-	cmd := exec.Command("go", "build", "-o", "resumake", ".")
-	return cmd.Run()
+	cmd := exec.Command("go", "build", "-o", "goresumake", "./cmd/goresumake.go")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s", b)
+	return nil
 }
 
 // A custom install step if you need your bin someplace other than go/bin
@@ -32,13 +38,28 @@ func Install() error {
 // Manage your deps, or running package managers.
 func InstallDeps() error {
 	fmt.Println("Installing Deps...")
-	// cmd := exec.Command("go", "get", "github.com/stretchr/piglatin")
-	// return cmd.Run()
+	cmd := exec.Command("go", "mod", "download")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s", b)
+	return nil
+}
+
+func Test() error {
+	cmd := exec.Command("go", "test", "-cover", "./...")
+
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s", b)
 	return nil
 }
 
 // Clean up after yourself
 func Clean() {
 	fmt.Println("Cleaning...")
-	os.RemoveAll("resumake")
+	os.RemoveAll("goresumake")
 }

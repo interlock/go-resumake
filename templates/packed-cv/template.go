@@ -16,6 +16,8 @@ const document = `
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[hidelinks]{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, portrait, margin=5em}
 \textheight=10in
 \pagestyle{empty}
 
@@ -175,7 +177,7 @@ const education = `
   {{- end -}}
   {{- if .Area -}}
 	{{- if .StudyType -}}
-	  {{- $line2 = printf "%s %s" $line2 (escape .Area) -}}
+	  {{- $line2 = printf "%s $\\cdot$ %s" $line2 (escape .Area) -}}
 	{{- else -}}
 	  {{- $line2 = printf "Degree in %s" (escape .Area) -}}
 	{{- end -}}

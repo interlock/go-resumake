@@ -6,12 +6,27 @@ import (
 	"os"
 	"strings"
 
+	"github.com/interlock/go-resumake/jsonresume"
 	"github.com/interlock/go-resumake/templates"
 )
 
+var (
+	flagJsonResume string
+	flagVerbose    bool
+	flagTemplate   string
+	flagLatex      string
+)
+
+func init() {
+	flag.StringVar(&flagJsonResume, "input", "", "input json resume")
+	flag.BoolVar(&flagVerbose, "verbose", false, "enable verbose")
+	flag.StringVar(&flagTemplate, "template", "", "template")
+	flag.StringVar(&flagLatex, "latex", "", "latex")
+}
+
 func main() {
 	flag.Parse()
-	jsonResume, err := decodeFile(flagJsonResume)
+	jsonResume, err := jsonresume.DecodeFile(flagJsonResume)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
@@ -31,7 +46,7 @@ func main() {
 	if len(flagLatex) > 0 {
 		fp, err := os.Create(flagLatex)
 		if err != nil {
-			fmt.Println("%s\n", err)
+			fmt.Printf("%s\n", err)
 			os.Exit(5)
 		}
 

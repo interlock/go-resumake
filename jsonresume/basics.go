@@ -1,27 +1,27 @@
 package jsonresume
 
 type Basics struct {
-	Name string
-	Label string
-	Picture string
-	Email string
-	Phone string
-	Website string
-	Summary string
+	Name     string
+	Label    string
+	Picture  string
+	Email    string
+	Phone    string
+	Website  string
+	Summary  string
 	Location Location
 	Profiles []Profile
 }
 
 type Location struct {
-	Address string
-	PostalCode string
-	City string
+	Address     string
+	PostalCode  string
+	City        string
 	CountryCode string
-	Region string
+	Region      string
 }
 
 type Profile struct {
-	Network string
+	Network  string
 	Username string
-	Url string
+	Url      string
 }
