@@ -6,7 +6,6 @@ const work = `
 %==== Experience ====%
 
 \header{Experience}
-\vspace{1mm}
 {{- range .JSON.Work -}}
 	{{- $line1 := "" -}}
 	{{- $line2 := "" -}}
@@ -31,7 +30,7 @@ const work = `
 		{{- end -}}
 	{{- end -}}
 
-	{{- if $line1 -}}{{- $line1 = printf "%s" $line1 -}}{{- end -}}
+	{{- if $line1 -}}{{- $line1 = printf "\\noindent%s" $line1 -}}{{- end -}}
 	{{- if $line2 -}}{{- $line2 = printf "%s\\\\" $line2 -}}{{- end -}}
 	
 	{{- if .Highlights -}}
@@ -43,11 +42,17 @@ const work = `
 		{{- $highlightLines = appendSlice $highlightLines "\\end{itemize}" -}}
 	{{- end -}}
 	
-	{{ $line1 }}
-	{{ $line2 }}
-	{{ join $highlightLines "\n" }}
-	{{ printf "\n" }}
+{{ $line1 }}
+{{ $line2 }}
+	{{ if gt (len $highlightLines) 0 }}
+	{{ (join $highlightLines "\n") }}
+\vspace{2mm}
+	{{ else }}
+	{{ end }}
+	
+	
 {{- end -}}
 {{- end -}}
+\vspace{4mm}
 {{- end -}}
 `

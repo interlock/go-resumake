@@ -4,7 +4,7 @@ const volunteer = `
 {{ define "Volunteer" }}
 
 %==== volunteer ====%
-
+\noindent\begin{minipage}{\textwidth}
 \header{Volunteering}
 \begin{tabular}{ l p{.8\textwidth} }
 {{ range .JSON.Volunteer -}}
@@ -16,6 +16,7 @@ const volunteer = `
 	{{ printf "%s $\\cdot$ %s $\\cdot$ %s\\\\\n" (escape .Organization) (escape .Position) (join $dates " $\\cdot$ ") }}
 {{- end -}}
 \end{tabular}
+\end{minipage}
 \vspace{2mm}
 {{- end -}}
 `
